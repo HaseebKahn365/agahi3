@@ -746,18 +746,29 @@ class _BuyItemScreenState extends State<BuyItemScreen> {
             const SizedBox(height: 20),
 
             // Price
-            Text(
-              _getLocalizedText('Price:', 'بیه:', 'قیمت:'),
-              style: const TextStyle(fontSize: 18, fontWeight: FontWeight.w600),
-            ),
+            // Text(
+            //   _getLocalizedText('Price:', 'بیه:', 'قیمت:') +
+            //       widget.item.price.toString(),
+            //   style: const TextStyle(fontSize: 18, fontWeight: FontWeight.w600),
+            // ),
             const SizedBox(height: 8),
-            Text(
-              'PKR ${widget.item.price.toStringAsFixed(0)}',
-              style: const TextStyle(
-                fontSize: 32,
-                fontWeight: FontWeight.bold,
-                color: Colors.green,
-              ),
+            // Text(
+            //   'PKR ${widget.item.price.toStringAsFixed(0)}',
+            //   style: const TextStyle(
+            //     fontSize: 32,
+            //     fontWeight: FontWeight.bold,
+            //     color: Colors.green,
+            //   ),
+            // ),
+
+            // Display notes
+            Wrap(
+              spacing: 5.0, // gap between adjacent chips
+              runSpacing: 5.0, // gap between lines
+              children:
+                  getNotes(widget.item.price).map((e) {
+                    return SizedBox(width: 100, height: 50, child: e);
+                  }).toList(),
             ),
 
             const SizedBox(height: 24),
@@ -791,4 +802,54 @@ class _BuyItemScreenState extends State<BuyItemScreen> {
       ),
     );
   }
+}
+
+//i have got images of rs. 50,100,500,1000,5000. we need to recursively find the List<Image> that will show the price of the item. then we will use wrap widget for these notes:
+
+//lets use the following approach, start from the item price, if less than 5000 switch to rs 1000 and so on until divisible. we add these notes if divisible to the list<image and then return it
+
+List<Image> getNotes(int price) {
+  List<Image> notes = [];
+
+  if (price >= 5000) {
+    int count = price ~/ 5000;
+    for (int i = 0; i < count; i++) {
+      notes.add(Image.asset('assets/images/payment/5000.png'));
+    }
+    price %= 5000;
+  }
+
+  if (price >= 1000) {
+    int count = price ~/ 1000;
+    for (int i = 0; i < count; i++) {
+      notes.add(Image.asset('assets/images/payment/1000.png'));
+    }
+    price %= 1000;
+  }
+
+  if (price >= 500) {
+    int count = price ~/ 500;
+    for (int i = 0; i < count; i++) {
+      notes.add(Image.asset('assets/images/payment/500.png'));
+    }
+    price %= 500;
+  }
+
+  if (price >= 100) {
+    int count = price ~/ 100;
+    for (int i = 0; i < count; i++) {
+      notes.add(Image.asset('assets/images/payment/100.png'));
+    }
+    price %= 100;
+  }
+
+  if (price >= 50) {
+    int count = price ~/ 50;
+    for (int i = 0; i < count; i++) {
+      notes.add(Image.asset('assets/images/payment/50.png'));
+    }
+    price %= 50;
+  }
+
+  return notes;
 }

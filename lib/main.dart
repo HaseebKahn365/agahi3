@@ -6,10 +6,10 @@ import 'package:flutter/material.dart';
 import 'package:flutter_staggered_grid_view/flutter_staggered_grid_view.dart';
 import 'package:youtube_player_flutter/youtube_player_flutter.dart';
 
-enum Lang { ps, ur } //pashto and urdu
+enum Lang { ps, ur, en } //pashto, urdu, and english
 
 class SettingsForApp {
-  Lang language = Lang.ur;
+  Lang language = Lang.en;
   bool voiceOn = true;
 
   void switchLanguage(Lang newLang) {
@@ -97,13 +97,24 @@ class SettingsScreen extends StatefulWidget {
 }
 
 class _SettingsScreenState extends State<SettingsScreen> {
+  String _getLocalizedText(String english, String pashto, String urdu) {
+    switch (settings.language) {
+      case Lang.en:
+        return english;
+      case Lang.ps:
+        return pashto;
+      case Lang.ur:
+        return urdu;
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
         toolbarHeight: 120.0, // Increased height for better visibility
-        title: const Text(
-          'Settings',
+        title: Text(
+          _getLocalizedText('Settings', 'تنظیمات', 'سیٹنگز'),
           style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold),
         ),
         centerTitle: true,
@@ -136,9 +147,23 @@ class _SettingsScreenState extends State<SettingsScreen> {
             ],
           ),
 
-          const SizedBox(height: 100),
+          const SizedBox(width: 20, height: 10),
           CustomSquareButton(
-            text: settings.voiceOn ? 'Voice On' : 'Voice Off',
+            text: 'English',
+            enabled: settings.language == Lang.en,
+            onPressed: () {
+              setState(() {
+                settings.switchLanguage(Lang.en);
+              });
+            },
+          ),
+
+          const SizedBox(height: 50),
+          CustomSquareButton(
+            text:
+                settings.voiceOn
+                    ? _getLocalizedText('Voice On', 'غږ بل', 'آواز آن')
+                    : _getLocalizedText('Voice Off', 'غږ بند', 'آواز آف'),
             enabled: settings.voiceOn,
             icon: Icon(
               settings.voiceOn ? Icons.volume_up : Icons.volume_off,
@@ -152,7 +177,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
             size: 120.0, // Increased size for better visibility
           ),
 
-          const SizedBox(height: 100),
+          const SizedBox(height: 50),
           //animated next button:
           SexyCustomNextButton(
             onPressed: () {
@@ -203,13 +228,24 @@ class MainScreen extends StatefulWidget {
 }
 
 class _MainScreenState extends State<MainScreen> {
+  String _getLocalizedText(String english, String pashto, String urdu) {
+    switch (settings.language) {
+      case Lang.en:
+        return english;
+      case Lang.ps:
+        return pashto;
+      case Lang.ur:
+        return urdu;
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
         toolbarHeight: 120.0,
-        title: const Text(
-          'Main Screen',
+        title: Text(
+          _getLocalizedText('Main Screen', 'اصلي پاڼه', 'مین سکرین'),
           style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold),
         ),
         centerTitle: true,
@@ -244,7 +280,10 @@ class _MainScreenState extends State<MainScreen> {
               crossAxisCellCount: 1,
               mainAxisCellCount: 1.3,
               child: CustomTallCategoryButton(
-                text: 'Education',
+                text:
+                    settings.voiceOn
+                        ? _getLocalizedText('Education', 'زده کړه', 'تعلیم')
+                        : '',
                 imagePath: 'assets/images/edu.png',
                 onPressed: () {
                   Navigator.push(
@@ -260,7 +299,10 @@ class _MainScreenState extends State<MainScreen> {
               crossAxisCellCount: 1,
               mainAxisCellCount: 1.3,
               child: CustomTallCategoryButton(
-                text: 'Agriculture',
+                text:
+                    settings.voiceOn
+                        ? _getLocalizedText('Agriculture', 'کرنه', 'زراعت')
+                        : '',
                 imagePath: 'assets/images/agri.png',
                 onPressed: () {},
               ),
@@ -269,7 +311,10 @@ class _MainScreenState extends State<MainScreen> {
               crossAxisCellCount: 1,
               mainAxisCellCount: 1.3,
               child: CustomTallCategoryButton(
-                text: 'Health',
+                text:
+                    settings.voiceOn
+                        ? _getLocalizedText('Health', 'روغتیا', 'صحت')
+                        : '',
                 imagePath: 'assets/images/health.png',
                 onPressed: () {},
               ),
@@ -278,7 +323,10 @@ class _MainScreenState extends State<MainScreen> {
               crossAxisCellCount: 1,
               mainAxisCellCount: 1.3,
               child: CustomTallCategoryButton(
-                text: 'E-commerce',
+                text:
+                    settings.voiceOn
+                        ? _getLocalizedText('E-commerce', 'بازار', 'تجارت')
+                        : '',
                 imagePath: 'assets/images/ecom.png',
                 onPressed: () {
                   Navigator.push(
@@ -300,13 +348,24 @@ class _MainScreenState extends State<MainScreen> {
 class EducationScreen extends StatelessWidget {
   const EducationScreen({super.key});
 
+  String _getLocalizedText(String english, String pashto, String urdu) {
+    switch (settings.language) {
+      case Lang.en:
+        return english;
+      case Lang.ps:
+        return pashto;
+      case Lang.ur:
+        return urdu;
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
         toolbarHeight: 120.0,
-        title: const Text(
-          'Education',
+        title: Text(
+          _getLocalizedText('Education', 'زده کړه', 'تعلیم'),
           style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold),
         ),
         centerTitle: true,
@@ -328,7 +387,7 @@ class EducationScreen extends StatelessWidget {
           ),
         ],
       ),
-      body: const SingleChildScrollView(
+      body: SingleChildScrollView(
         child: Column(
           children: [
             YoutubeVideoPlayer(
@@ -337,7 +396,11 @@ class EducationScreen extends StatelessWidget {
             Padding(
               padding: EdgeInsets.all(20.0),
               child: Text(
-                'This is a simple education screen with a youtube video player. You can add more content here.',
+                _getLocalizedText(
+                  'This is a simple education screen with a youtube video player. You can add more content here.',
+                  'دا د یوټیوب ویډیو پلیر سره د زده کړې ساده پاڼه دی. تاسو کولی شئ دلته نور مطالب اضافه کړئ.',
+                  'یہ یوٹیوب ویڈیو پلیئر کے ساتھ ایک سادہ تعلیمی سکرین ہے۔ آپ یہاں مزید مواد شامل کر سکتے ہیں۔',
+                ),
                 style: TextStyle(fontSize: 16),
               ),
             ),

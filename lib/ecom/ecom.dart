@@ -120,13 +120,24 @@ class EcomScreen extends StatefulWidget {
 }
 
 class _EcomScreenState extends State<EcomScreen> {
+  String _getLocalizedText(String english, String pashto, String urdu) {
+    switch (settings.language) {
+      case Lang.en:
+        return english;
+      case Lang.ps:
+        return pashto;
+      case Lang.ur:
+        return urdu;
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
         toolbarHeight: 80.0,
         title: Text(
-          'Ecommerce',
+          _getLocalizedText('E-commerce', 'بازار', 'تجارت'),
           style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold),
         ),
         centerTitle: true,
@@ -139,7 +150,7 @@ class _EcomScreenState extends State<EcomScreen> {
         actions: [
           IconButton(
             icon:
-                settings.voiceOn
+                !settings.voiceOn
                     ? Icon(Icons.volume_up)
                     : Icon(Icons.volume_off),
             onPressed: () {
@@ -175,7 +186,14 @@ class EcomItemCard extends StatelessWidget {
 
   String _getItemName() {
     // Return name based on selected language
-    return settings.language == Lang.ur ? item.urName : item.psName;
+    switch (settings.language) {
+      case Lang.en:
+        return item.engName;
+      case Lang.ur:
+        return item.urName;
+      case Lang.ps:
+        return item.psName;
+    }
   }
 
   @override
@@ -224,18 +242,20 @@ class EcomItemCard extends StatelessWidget {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                Text(
-                  _getItemName(),
-                  style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
-                  maxLines: 1,
-                  overflow: TextOverflow.ellipsis,
-                ),
-                SizedBox(height: 4),
-                Text(
-                  'PKR ${item.price}',
-                  style: TextStyle(fontSize: 14, color: Colors.grey[700]),
-                ),
-                SizedBox(height: 4),
+                if (!settings.voiceOn)
+                  Text(
+                    _getItemName(),
+                    style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
+                    maxLines: 1,
+                    overflow: TextOverflow.ellipsis,
+                  ),
+                if (!settings.voiceOn) SizedBox(height: 4),
+                if (!settings.voiceOn)
+                  Text(
+                    'PKR ${item.price}',
+                    style: TextStyle(fontSize: 14, color: Colors.grey[700]),
+                  ),
+                if (!settings.voiceOn) SizedBox(height: 4),
                 Row(
                   children: List.generate(
                     5,
@@ -268,6 +288,8 @@ class BuyItemScreen extends StatefulWidget {
 class _BuyItemScreenState extends State<BuyItemScreen> {
   String _getItemName() {
     switch (settings.language) {
+      case Lang.en:
+        return widget.item.engName;
       case Lang.ps:
         return widget.item.psName;
       case Lang.ur:
@@ -277,6 +299,8 @@ class _BuyItemScreenState extends State<BuyItemScreen> {
 
   String _getLocalizedText(String english, String pashto, String urdu) {
     switch (settings.language) {
+      case Lang.en:
+        return english;
       case Lang.ps:
         return pashto;
       case Lang.ur:
@@ -332,18 +356,19 @@ class _BuyItemScreenState extends State<BuyItemScreen> {
                     const SizedBox(height: 20),
 
                     // Title
-                    Text(
-                      _getLocalizedText(
-                        'Purchase Confirmation',
-                        'د پیرود تصدیق',
-                        'خریداری کی تصدیق',
+                    if (!settings.voiceOn)
+                      Text(
+                        _getLocalizedText(
+                          'Purchase Confirmation',
+                          'د پیرود تصدیق',
+                          'خریداری کی تصدیق',
+                        ),
+                        style: const TextStyle(
+                          fontSize: 24,
+                          fontWeight: FontWeight.bold,
+                        ),
                       ),
-                      style: const TextStyle(
-                        fontSize: 24,
-                        fontWeight: FontWeight.bold,
-                      ),
-                    ),
-                    const SizedBox(height: 24),
+                    if (!settings.voiceOn) const SizedBox(height: 24),
 
                     // Order Summary
                     Container(
@@ -356,25 +381,26 @@ class _BuyItemScreenState extends State<BuyItemScreen> {
                       child: Column(
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
-                          Text(
-                            _getLocalizedText(
-                              'Order Summary',
-                              'د امر لنډیز',
-                              'آرڈر کا خلاصہ',
+                          if (!settings.voiceOn)
+                            Text(
+                              _getLocalizedText(
+                                'Order Summary',
+                                'د امر لنډیز',
+                                'آرڈر کا خلاصہ',
+                              ),
+                              style: const TextStyle(
+                                fontSize: 18,
+                                fontWeight: FontWeight.w600,
+                              ),
                             ),
-                            style: const TextStyle(
-                              fontSize: 18,
-                              fontWeight: FontWeight.w600,
-                            ),
-                          ),
-                          const SizedBox(height: 12),
+                          if (!settings.voiceOn) const SizedBox(height: 12),
                           Row(
                             children: [
                               ClipRRect(
                                 borderRadius: BorderRadius.circular(8),
                                 child: SizedBox(
-                                  width: 60,
-                                  height: 60,
+                                  width: 120,
+                                  height: 120,
                                   child:
                                       widget.item.imageUrl != null
                                           ? CachedNetworkImage(
@@ -389,7 +415,7 @@ class _BuyItemScreenState extends State<BuyItemScreen> {
                                           )
                                           : Image.asset(
                                             widget.item.imagePath,
-                                            fit: BoxFit.cover,
+                                            fit: BoxFit.fitWidth,
                                           ),
                                 ),
                               ),
@@ -398,23 +424,25 @@ class _BuyItemScreenState extends State<BuyItemScreen> {
                                 child: Column(
                                   crossAxisAlignment: CrossAxisAlignment.start,
                                   children: [
-                                    Text(
-                                      _getItemName(),
-                                      style: const TextStyle(
-                                        fontSize: 16,
-                                        fontWeight: FontWeight.w600,
+                                    if (!settings.voiceOn)
+                                      Text(
+                                        _getItemName(),
+                                        style: const TextStyle(
+                                          fontSize: 16,
+                                          fontWeight: FontWeight.w600,
+                                        ),
                                       ),
-                                    ),
-                                    const SizedBox(height: 4),
-                                    const SizedBox(height: 4),
-                                    Text(
-                                      'روپے ${(widget.item.price).toStringAsFixed(0)}',
-                                      style: const TextStyle(
-                                        fontSize: 16,
-                                        fontWeight: FontWeight.bold,
-                                        color: Colors.green,
+                                    if (!settings.voiceOn)
+                                      const SizedBox(height: 8),
+                                    if (!settings.voiceOn)
+                                      Text(
+                                        'روپے ${(widget.item.price).toStringAsFixed(0)}',
+                                        style: const TextStyle(
+                                          fontSize: 16,
+                                          fontWeight: FontWeight.bold,
+                                          color: Colors.green,
+                                        ),
                                       ),
-                                    ),
                                   ],
                                 ),
                               ),
@@ -427,18 +455,19 @@ class _BuyItemScreenState extends State<BuyItemScreen> {
                     const SizedBox(height: 24),
 
                     // Delivery Address
-                    Text(
-                      _getLocalizedText(
-                        'Delivery Address',
-                        'د رسولو پته',
-                        'ڈیلیوری کا پتہ',
+                    if (!settings.voiceOn)
+                      Text(
+                        _getLocalizedText(
+                          'Delivery Address',
+                          'د رسولو پته',
+                          'ڈیلیوری کا پتہ',
+                        ),
+                        style: const TextStyle(
+                          fontSize: 18,
+                          fontWeight: FontWeight.w600,
+                        ),
                       ),
-                      style: const TextStyle(
-                        fontSize: 18,
-                        fontWeight: FontWeight.w600,
-                      ),
-                    ),
-                    const SizedBox(height: 12),
+                    if (!settings.voiceOn) const SizedBox(height: 12),
                     Container(
                       width: double.infinity,
                       padding: const EdgeInsets.all(16),
@@ -467,18 +496,19 @@ class _BuyItemScreenState extends State<BuyItemScreen> {
                     const SizedBox(height: 24),
 
                     // Payment Options
-                    Text(
-                      _getLocalizedText(
-                        'Payment Options',
-                        'د ورکړې لارې',
-                        'ادائیگی کے طریقے',
+                    if (!settings.voiceOn)
+                      Text(
+                        _getLocalizedText(
+                          'Payment Options',
+                          'د ورکړې لارې',
+                          'ادائیگی کے طریقے',
+                        ),
+                        style: const TextStyle(
+                          fontSize: 18,
+                          fontWeight: FontWeight.w600,
+                        ),
                       ),
-                      style: const TextStyle(
-                        fontSize: 18,
-                        fontWeight: FontWeight.w600,
-                      ),
-                    ),
-                    const SizedBox(height: 12),
+                    if (!settings.voiceOn) const SizedBox(height: 12),
 
                     // Payment method cards
                     _buildPaymentOption(
@@ -545,15 +575,17 @@ class _BuyItemScreenState extends State<BuyItemScreen> {
               child: Image.asset(imagePath, width: 50, height: 50),
             ),
             const SizedBox(width: 16),
-            Expanded(
-              child: Text(
-                name,
-                style: const TextStyle(
-                  fontSize: 16,
-                  fontWeight: FontWeight.w500,
+            if (!settings.voiceOn)
+              Expanded(
+                child: Text(
+                  name,
+                  style: const TextStyle(
+                    fontSize: 16,
+                    fontWeight: FontWeight.w500,
+                  ),
                 ),
               ),
-            ),
+            if (!!settings.voiceOn) const Spacer(),
             Icon(Icons.arrow_forward_ios, size: 16, color: Colors.grey[400]),
           ],
         ),
@@ -585,13 +617,16 @@ class _BuyItemScreenState extends State<BuyItemScreen> {
       barrierDismissible: false,
       builder: (BuildContext context) {
         return AlertDialog(
-          title: Text(
-            _getLocalizedText(
-              'Processing Payment',
-              'د ورکړې پروسس',
-              'ادائیگی کی کارروائی',
-            ),
-          ),
+          title:
+              !settings.voiceOn
+                  ? Text(
+                    _getLocalizedText(
+                      'Processing Payment',
+                      'د ورکړې پروسس',
+                      'ادائیگی کی کارروائی',
+                    ),
+                  )
+                  : null,
           content: Column(
             mainAxisSize: MainAxisSize.min,
             children: [
@@ -599,14 +634,15 @@ class _BuyItemScreenState extends State<BuyItemScreen> {
               const SizedBox(height: 16),
               const CircularProgressIndicator(color: Colors.black),
               const SizedBox(height: 16),
-              Text(
-                _getLocalizedText(
-                  'Please wait while we process your payment via $paymentMethod...',
-                  'مهرباني وکړئ انتظار وکړئ کله چې موږ ستاسو د $paymentMethod له لارې ورکړه پروسس کوو...',
-                  'برائے کرم انتظار کریں جب تک ہم آپ کی $paymentMethod کے ذریعے ادائیگی کو پروسیس کرتے ہیں...',
+              if (!settings.voiceOn)
+                Text(
+                  _getLocalizedText(
+                    'Please wait while we process your payment via $paymentMethod...',
+                    'مهرباني وکړئ انتظار وکړئ کله چې موږ ستاسو د $paymentMethod له لارې ورکړه پروسس کوو...',
+                    'برائے کرم انتظار کریں جب تک ہم آپ کی $paymentMethod کے ذریعے ادائیگی کو پروسیس کرتے ہیں...',
+                  ),
+                  textAlign: TextAlign.center,
                 ),
-                textAlign: TextAlign.center,
-              ),
             ],
           ),
         );
@@ -622,26 +658,30 @@ class _BuyItemScreenState extends State<BuyItemScreen> {
         context: context,
         builder: (BuildContext context) {
           return AlertDialog(
-            title: Text(
-              _getLocalizedText(
-                'Payment Successful!',
-                'ورکړه بریالۍ وه!',
-                'ادائیگی کامیاب رہی!',
-              ),
-            ),
+            title:
+                !settings.voiceOn
+                    ? Text(
+                      _getLocalizedText(
+                        'Payment Successful!',
+                        'ورکړه بریالۍ وه!',
+                        'ادائیگی کامیاب رہی!',
+                      ),
+                    )
+                    : null,
             content: Column(
               mainAxisSize: MainAxisSize.min,
               children: [
                 const Icon(Icons.check_circle, color: Colors.green, size: 64),
                 const SizedBox(height: 16),
-                Text(
-                  _getLocalizedText(
-                    'Your order has been placed successfully! You will receive a confirmation shortly.',
-                    'ستاسو امر په بریالیتوب سره ورکړل شو! تاسو به ډیر ژر تصدیق ترلاسه کړئ.',
-                    'آپ کا آرڈر کامیابی سے دے دیا گیا ہے! آپ کو جلد ہی تصدیق موصول ہوگی۔',
+                if (!settings.voiceOn)
+                  Text(
+                    _getLocalizedText(
+                      'Your order has been placed successfully! You will receive a confirmation shortly.',
+                      'ستاسو امر په بریالیتوب سره ورکړل شو! تاسو به ډیر ژر تصدیق ترلاسه کړئ.',
+                      'آپ کا آرڈر کامیابی سے دے دیا گیا ہے! آپ کو جلد ہی تصدیق موصول ہوگی۔',
+                    ),
+                    textAlign: TextAlign.center,
                   ),
-                  textAlign: TextAlign.center,
-                ),
               ],
             ),
             actions: [
@@ -650,10 +690,13 @@ class _BuyItemScreenState extends State<BuyItemScreen> {
                   Navigator.pop(context); // Close success dialog
                   Navigator.pop(context); // Go back to previous screen
                 },
-                child: Text(
-                  _getLocalizedText('OK', 'سمه ده', 'ٹھیک ہے'),
-                  style: TextStyle(color: Colors.black),
-                ),
+                child:
+                    !settings.voiceOn
+                        ? Text(
+                          _getLocalizedText('OK', 'سمه ده', 'ٹھیک ہے'),
+                          style: TextStyle(color: Colors.black),
+                        )
+                        : Icon(Icons.check, color: Colors.black),
               ),
             ],
           );
@@ -724,12 +767,16 @@ class _BuyItemScreenState extends State<BuyItemScreen> {
             const SizedBox(height: 24),
 
             // Item Name
-            Text(
-              _getItemName(),
-              style: const TextStyle(fontSize: 28, fontWeight: FontWeight.bold),
-            ),
+            if (!settings.voiceOn)
+              Text(
+                _getItemName(),
+                style: const TextStyle(
+                  fontSize: 28,
+                  fontWeight: FontWeight.bold,
+                ),
+              ),
 
-            const SizedBox(height: 12),
+            if (!settings.voiceOn) const SizedBox(height: 12),
 
             // Rating
             Row(
@@ -788,12 +835,24 @@ class _BuyItemScreenState extends State<BuyItemScreen> {
                     borderRadius: BorderRadius.circular(12),
                   ),
                 ),
-                child: Text(
-                  _getLocalizedText('Buy Now', 'اوس واخلئ', 'ابھی خریدیں'),
-                  style: const TextStyle(
-                    fontSize: 20,
-                    fontWeight: FontWeight.bold,
-                  ),
+                child: Row(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    Icon(Icons.shopping_cart, size: 30, color: Colors.white),
+
+                    if (!settings.voiceOn)
+                      Text(
+                        _getLocalizedText(
+                          '    Buy Now',
+                          '   اوس واخلئ',
+                          '   ابھی خریدیں',
+                        ),
+                        style: const TextStyle(
+                          fontSize: 20,
+                          fontWeight: FontWeight.bold,
+                        ),
+                      ),
+                  ],
                 ),
               ),
             ),

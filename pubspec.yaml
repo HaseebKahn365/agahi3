@@ -63,6 +63,7 @@ flutter:
   assets:
     - assets/images/
     - assets/images/payment/
+    - assets/images/health/demo/
   #   - images/a_dot_ham.jpeg
 
   # An image asset can refer to one or more resolution-specific "variants", see

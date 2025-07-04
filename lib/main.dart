@@ -2,6 +2,7 @@
 
 import 'package:agahi/custom_wids.dart';
 import 'package:agahi/ecom/ecom.dart';
+import 'package:agahi/health/health.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_staggered_grid_view/flutter_staggered_grid_view.dart';
 import 'package:youtube_player_flutter/youtube_player_flutter.dart';
@@ -316,7 +317,38 @@ class _MainScreenState extends State<MainScreen> {
                         ? _getLocalizedText('Health', 'روغتیا', 'صحت')
                         : '',
                 imagePath: 'assets/images/health.png',
-                onPressed: () {},
+                onPressed: () {
+                  //navigate to health screen using a smooth left to right transition
+                  Navigator.push(
+                    context,
+                    PageRouteBuilder(
+                      pageBuilder:
+                          (context, animation, secondaryAnimation) =>
+                              const HealthScreen(),
+                      transitionsBuilder: (
+                        context,
+                        animation,
+                        secondaryAnimation,
+                        child,
+                      ) {
+                        const begin = Offset(1.0, 0.0);
+                        const end = Offset.zero;
+                        const curve = Curves.easeInOut;
+
+                        var tween = Tween(
+                          begin: begin,
+                          end: end,
+                        ).chain(CurveTween(curve: curve));
+                        var offsetAnimation = animation.drive(tween);
+
+                        return SlideTransition(
+                          position: offsetAnimation,
+                          child: child,
+                        );
+                      },
+                    ),
+                  );
+                },
               ),
             ),
             StaggeredGridTile.count(

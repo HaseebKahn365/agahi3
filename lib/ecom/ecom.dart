@@ -804,10 +804,6 @@ class _BuyItemScreenState extends State<BuyItemScreen> {
   }
 }
 
-//i have got images of rs. 50,100,500,1000,5000. we need to recursively find the List<Image> that will show the price of the item. then we will use wrap widget for these notes:
-
-//lets use the following approach, start from the item price, if less than 5000 switch to rs 1000 and so on until divisible. we add these notes if divisible to the list<image and then return it
-
 List<Image> getNotes(int price) {
   List<Image> notes = [];
 

@@ -3,6 +3,7 @@
 import 'package:agahi/main.dart';
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
 
 enum Domain { edu, health, ecom, agri }
 
@@ -112,15 +113,16 @@ class EcomItems {
   ];
 }
 
-class EcomScreen extends StatefulWidget {
+class EcomScreen extends StatelessWidget {
   const EcomScreen({super.key});
 
-  @override
-  State<EcomScreen> createState() => _EcomScreenState();
-}
-
-class _EcomScreenState extends State<EcomScreen> {
-  String _getLocalizedText(String english, String pashto, String urdu) {
+  String _getLocalizedText(
+    BuildContext context,
+    String english,
+    String pashto,
+    String urdu,
+  ) {
+    final settings = context.watch<SettingsForAppProvider>();
     switch (settings.language) {
       case Lang.en:
         return english;
@@ -133,16 +135,18 @@ class _EcomScreenState extends State<EcomScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final settings = context.watch<SettingsForAppProvider>();
+    final settingsNotifier = context.read<SettingsForAppProvider>();
     return Scaffold(
       appBar: AppBar(
         toolbarHeight: 80.0,
         title: Text(
-          _getLocalizedText('E-commerce', 'بازار', 'تجارت'),
-          style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold),
+          _getLocalizedText(context, 'E-commerce', 'بازار', 'تجارت'),
+          style: const TextStyle(fontSize: 24, fontWeight: FontWeight.bold),
         ),
         centerTitle: true,
         leading: IconButton(
-          icon: Icon(Icons.arrow_back),
+          icon: const Icon(Icons.arrow_back),
           onPressed: () {
             Navigator.pop(context);
           },
@@ -150,13 +154,11 @@ class _EcomScreenState extends State<EcomScreen> {
         actions: [
           IconButton(
             icon:
-                !settings.voiceOn
-                    ? Icon(Icons.volume_up)
-                    : Icon(Icons.volume_off),
+                settings.voiceOn
+                    ? const Icon(Icons.volume_up)
+                    : const Icon(Icons.volume_off),
             onPressed: () {
-              setState(() {
-                settings.toggleVoice();
-              });
+              settingsNotifier.toggleVoice();
             },
           ),
         ],
@@ -184,7 +186,8 @@ class EcomItemCard extends StatelessWidget {
 
   const EcomItemCard({super.key, required this.item});
 
-  String _getItemName() {
+  String _getItemName(BuildContext context) {
+    final settings = context.watch<SettingsForAppProvider>();
     // Return name based on selected language
     switch (settings.language) {
       case Lang.en:
@@ -198,6 +201,7 @@ class EcomItemCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final settings = context.watch<SettingsForAppProvider>();
     return ElevatedButton(
       style: ElevatedButton.styleFrom(
         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
@@ -213,7 +217,9 @@ class EcomItemCard extends StatelessWidget {
         children: [
           Expanded(
             child: ClipRRect(
-              borderRadius: BorderRadius.vertical(top: Radius.circular(10)),
+              borderRadius: const BorderRadius.vertical(
+                top: Radius.circular(10),
+              ),
               // First try to load from URL, if null or fails, use asset image
               child:
                   item.imageUrl != null
@@ -238,24 +244,27 @@ class EcomItemCard extends StatelessWidget {
             ),
           ),
           Padding(
-            padding: EdgeInsets.all(8),
+            padding: const EdgeInsets.all(8),
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                if (!settings.voiceOn)
+                if (settings.voiceOn)
                   Text(
-                    _getItemName(),
-                    style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
+                    _getItemName(context),
+                    style: const TextStyle(
+                      fontSize: 16,
+                      fontWeight: FontWeight.bold,
+                    ),
                     maxLines: 1,
                     overflow: TextOverflow.ellipsis,
                   ),
-                if (!settings.voiceOn) SizedBox(height: 4),
-                if (!settings.voiceOn)
+                if (settings.voiceOn) const SizedBox(height: 4),
+                if (settings.voiceOn)
                   Text(
                     'PKR ${item.price}',
                     style: TextStyle(fontSize: 14, color: Colors.grey[700]),
                   ),
-                if (!settings.voiceOn) SizedBox(height: 4),
+                if (settings.voiceOn) const SizedBox(height: 4),
                 Row(
                   children: List.generate(
                     5,
@@ -276,28 +285,30 @@ class EcomItemCard extends StatelessWidget {
 }
 
 //Buy Item Screen
-class BuyItemScreen extends StatefulWidget {
+class BuyItemScreen extends StatelessWidget {
   final EcomItem item;
 
   const BuyItemScreen({super.key, required this.item});
 
-  @override
-  State<BuyItemScreen> createState() => _BuyItemScreenState();
-}
-
-class _BuyItemScreenState extends State<BuyItemScreen> {
-  String _getItemName() {
+  String _getItemName(BuildContext context) {
+    final settings = context.watch<SettingsForAppProvider>();
     switch (settings.language) {
       case Lang.en:
-        return widget.item.engName;
+        return item.engName;
       case Lang.ps:
-        return widget.item.psName;
+        return item.psName;
       case Lang.ur:
-        return widget.item.urName;
+        return item.urName;
     }
   }
 
-  String _getLocalizedText(String english, String pashto, String urdu) {
+  String _getLocalizedText(
+    BuildContext context,
+    String english,
+    String pashto,
+    String urdu,
+  ) {
+    final settings = context.watch<SettingsForAppProvider>();
     switch (settings.language) {
       case Lang.en:
         return english;
@@ -322,6 +333,7 @@ class _BuyItemScreenState extends State<BuyItemScreen> {
   }
 
   void _showPurchaseConfirmationBottomSheet(BuildContext context) {
+    final settings = context.read<SettingsForAppProvider>();
     showModalBottomSheet(
       context: context,
       isScrollControlled: true,
@@ -356,9 +368,10 @@ class _BuyItemScreenState extends State<BuyItemScreen> {
                     const SizedBox(height: 20),
 
                     // Title
-                    if (!settings.voiceOn)
+                    if (settings.voiceOn)
                       Text(
                         _getLocalizedText(
+                          context,
                           'Purchase Confirmation',
                           'د پیرود تصدیق',
                           'خریداری کی تصدیق',
@@ -368,7 +381,7 @@ class _BuyItemScreenState extends State<BuyItemScreen> {
                           fontWeight: FontWeight.bold,
                         ),
                       ),
-                    if (!settings.voiceOn) const SizedBox(height: 24),
+                    if (settings.voiceOn) const SizedBox(height: 24),
 
                     // Order Summary
                     Container(
@@ -381,9 +394,10 @@ class _BuyItemScreenState extends State<BuyItemScreen> {
                       child: Column(
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
-                          if (!settings.voiceOn)
+                          if (settings.voiceOn)
                             Text(
                               _getLocalizedText(
+                                context,
                                 'Order Summary',
                                 'د امر لنډیز',
                                 'آرڈر کا خلاصہ',
@@ -393,7 +407,7 @@ class _BuyItemScreenState extends State<BuyItemScreen> {
                                 fontWeight: FontWeight.w600,
                               ),
                             ),
-                          if (!settings.voiceOn) const SizedBox(height: 12),
+                          if (settings.voiceOn) const SizedBox(height: 12),
                           Row(
                             children: [
                               ClipRRect(
@@ -402,9 +416,9 @@ class _BuyItemScreenState extends State<BuyItemScreen> {
                                   width: 120,
                                   height: 120,
                                   child:
-                                      widget.item.imageUrl != null
+                                      item.imageUrl != null
                                           ? CachedNetworkImage(
-                                            imageUrl: widget.item.imageUrl!,
+                                            imageUrl: item.imageUrl!,
                                             fit: BoxFit.cover,
                                             placeholder:
                                                 (context, url) =>
@@ -414,7 +428,7 @@ class _BuyItemScreenState extends State<BuyItemScreen> {
                                                     const Icon(Icons.error),
                                           )
                                           : Image.asset(
-                                            widget.item.imagePath,
+                                            item.imagePath,
                                             fit: BoxFit.fitWidth,
                                           ),
                                 ),
@@ -424,19 +438,19 @@ class _BuyItemScreenState extends State<BuyItemScreen> {
                                 child: Column(
                                   crossAxisAlignment: CrossAxisAlignment.start,
                                   children: [
-                                    if (!settings.voiceOn)
+                                    if (settings.voiceOn)
                                       Text(
-                                        _getItemName(),
+                                        _getItemName(context),
                                         style: const TextStyle(
                                           fontSize: 16,
                                           fontWeight: FontWeight.w600,
                                         ),
                                       ),
-                                    if (!settings.voiceOn)
+                                    if (settings.voiceOn)
                                       const SizedBox(height: 8),
-                                    if (!settings.voiceOn)
+                                    if (settings.voiceOn)
                                       Text(
-                                        'روپے ${(widget.item.price).toStringAsFixed(0)}',
+                                        'روپے ${(item.price).toStringAsFixed(0)}',
                                         style: const TextStyle(
                                           fontSize: 16,
                                           fontWeight: FontWeight.bold,
@@ -455,9 +469,10 @@ class _BuyItemScreenState extends State<BuyItemScreen> {
                     const SizedBox(height: 24),
 
                     // Delivery Address
-                    if (!settings.voiceOn)
+                    if (settings.voiceOn)
                       Text(
                         _getLocalizedText(
+                          context,
                           'Delivery Address',
                           'د رسولو پته',
                           'ڈیلیوری کا پتہ',
@@ -467,7 +482,7 @@ class _BuyItemScreenState extends State<BuyItemScreen> {
                           fontWeight: FontWeight.w600,
                         ),
                       ),
-                    if (!settings.voiceOn) const SizedBox(height: 12),
+                    if (settings.voiceOn) const SizedBox(height: 12),
                     Container(
                       width: double.infinity,
                       padding: const EdgeInsets.all(16),
@@ -496,9 +511,10 @@ class _BuyItemScreenState extends State<BuyItemScreen> {
                     const SizedBox(height: 24),
 
                     // Payment Options
-                    if (!settings.voiceOn)
+                    if (settings.voiceOn)
                       Text(
                         _getLocalizedText(
+                          context,
                           'Payment Options',
                           'د ورکړې لارې',
                           'ادائیگی کے طریقے',
@@ -508,25 +524,28 @@ class _BuyItemScreenState extends State<BuyItemScreen> {
                           fontWeight: FontWeight.w600,
                         ),
                       ),
-                    if (!settings.voiceOn) const SizedBox(height: 12),
+                    if (settings.voiceOn) const SizedBox(height: 12),
 
                     // Payment method cards
                     _buildPaymentOption(
+                      context,
                       'Visa Card',
                       'assets/images/payment/visa.png',
-                      () => _processPayment('Visa Card'),
+                      () => _processPayment(context, 'Visa Card'),
                     ),
                     const SizedBox(height: 8),
                     _buildPaymentOption(
+                      context,
                       'EasyPaisa',
                       'assets/images/payment/easypaisa.png',
-                      () => _processPayment('EasyPaisa'),
+                      () => _processPayment(context, 'EasyPaisa'),
                     ),
                     const SizedBox(height: 8),
                     _buildPaymentOption(
+                      context,
                       'JazzCash',
                       'assets/images/payment/jazzcash.png',
-                      () => _processPayment('JazzCash'),
+                      () => _processPayment(context, 'JazzCash'),
                     ),
 
                     const SizedBox(height: 24),
@@ -541,10 +560,12 @@ class _BuyItemScreenState extends State<BuyItemScreen> {
   }
 
   Widget _buildPaymentOption(
+    BuildContext context,
     String name,
     String imagePath,
     VoidCallback onTap,
   ) {
+    final settings = context.watch<SettingsForAppProvider>();
     return GestureDetector(
       onTap: onTap,
       child: Container(
@@ -575,7 +596,7 @@ class _BuyItemScreenState extends State<BuyItemScreen> {
               child: Image.asset(imagePath, width: 50, height: 50),
             ),
             const SizedBox(width: 16),
-            if (!settings.voiceOn)
+            if (settings.voiceOn)
               Expanded(
                 child: Text(
                   name,
@@ -585,7 +606,7 @@ class _BuyItemScreenState extends State<BuyItemScreen> {
                   ),
                 ),
               ),
-            if (!!settings.voiceOn) const Spacer(),
+            if (!settings.voiceOn) const Spacer(),
             Icon(Icons.arrow_forward_ios, size: 16, color: Colors.grey[400]),
           ],
         ),
@@ -593,7 +614,8 @@ class _BuyItemScreenState extends State<BuyItemScreen> {
     );
   }
 
-  void _processPayment(String paymentMethod) {
+  void _processPayment(BuildContext context, String paymentMethod) {
+    final settings = context.read<SettingsForAppProvider>();
     Navigator.pop(context); // Close bottom sheet
 
     String imagePath;
@@ -618,9 +640,10 @@ class _BuyItemScreenState extends State<BuyItemScreen> {
       builder: (BuildContext context) {
         return AlertDialog(
           title:
-              !settings.voiceOn
+              settings.voiceOn
                   ? Text(
                     _getLocalizedText(
+                      context,
                       'Processing Payment',
                       'د ورکړې پروسس',
                       'ادائیگی کی کارروائی',
@@ -634,9 +657,10 @@ class _BuyItemScreenState extends State<BuyItemScreen> {
               const SizedBox(height: 16),
               const CircularProgressIndicator(color: Colors.black),
               const SizedBox(height: 16),
-              if (!settings.voiceOn)
+              if (settings.voiceOn)
                 Text(
                   _getLocalizedText(
+                    context,
                     'Please wait while we process your payment via $paymentMethod...',
                     'مهرباني وکړئ انتظار وکړئ کله چې موږ ستاسو د $paymentMethod له لارې ورکړه پروسس کوو...',
                     'برائے کرم انتظار کریں جب تک ہم آپ کی $paymentMethod کے ذریعے ادائیگی کو پروسیس کرتے ہیں...',
@@ -659,9 +683,10 @@ class _BuyItemScreenState extends State<BuyItemScreen> {
         builder: (BuildContext context) {
           return AlertDialog(
             title:
-                !settings.voiceOn
+                settings.voiceOn
                     ? Text(
                       _getLocalizedText(
+                        context,
                         'Payment Successful!',
                         'ورکړه بریالۍ وه!',
                         'ادائیگی کامیاب رہی!',
@@ -673,9 +698,10 @@ class _BuyItemScreenState extends State<BuyItemScreen> {
               children: [
                 const Icon(Icons.check_circle, color: Colors.green, size: 64),
                 const SizedBox(height: 16),
-                if (!settings.voiceOn)
+                if (settings.voiceOn)
                   Text(
                     _getLocalizedText(
+                      context,
                       'Your order has been placed successfully! You will receive a confirmation shortly.',
                       'ستاسو امر په بریالیتوب سره ورکړل شو! تاسو به ډیر ژر تصدیق ترلاسه کړئ.',
                       'آپ کا آرڈر کامیابی سے دے دیا گیا ہے! آپ کو جلد ہی تصدیق موصول ہوگی۔',
@@ -691,12 +717,12 @@ class _BuyItemScreenState extends State<BuyItemScreen> {
                   Navigator.pop(context); // Go back to previous screen
                 },
                 child:
-                    !settings.voiceOn
+                    settings.voiceOn
                         ? Text(
-                          _getLocalizedText('OK', 'سمه ده', 'ٹھیک ہے'),
-                          style: TextStyle(color: Colors.black),
+                          _getLocalizedText(context, 'OK', 'سمه ده', 'ٹھیک ہے'),
+                          style: const TextStyle(color: Colors.black),
                         )
-                        : Icon(Icons.check, color: Colors.black),
+                        : const Icon(Icons.check, color: Colors.black),
               ),
             ],
           );
@@ -707,11 +733,12 @@ class _BuyItemScreenState extends State<BuyItemScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final settings = context.watch<SettingsForAppProvider>();
     return Scaffold(
       appBar: AppBar(
         toolbarHeight: 120.0,
         title: Text(
-          _getLocalizedText('Buy Item', 'توکي واخلئ', 'سامان خریدیں'),
+          _getLocalizedText(context, 'Buy Item', 'توکي واخلئ', 'سامان خریدیں'),
           style: const TextStyle(fontSize: 24, fontWeight: FontWeight.bold),
         ),
         centerTitle: true,
@@ -739,9 +766,9 @@ class _BuyItemScreenState extends State<BuyItemScreen> {
                 child: ClipRRect(
                   borderRadius: BorderRadius.circular(15),
                   child:
-                      widget.item.imageUrl != null
+                      item.imageUrl != null
                           ? CachedNetworkImage(
-                            imageUrl: widget.item.imageUrl!,
+                            imageUrl: item.imageUrl!,
                             fit: BoxFit.fill,
                             placeholder:
                                 (context, url) => const Center(
@@ -752,7 +779,7 @@ class _BuyItemScreenState extends State<BuyItemScreen> {
                                     const Icon(Icons.error, size: 50),
                           )
                           : Image.asset(
-                            widget.item.imagePath,
+                            item.imagePath,
                             fit: BoxFit.fill,
                             errorBuilder:
                                 (context, error, stackTrace) => const Icon(
@@ -767,21 +794,21 @@ class _BuyItemScreenState extends State<BuyItemScreen> {
             const SizedBox(height: 24),
 
             // Item Name
-            if (!settings.voiceOn)
+            if (settings.voiceOn)
               Text(
-                _getItemName(),
+                _getItemName(context),
                 style: const TextStyle(
                   fontSize: 28,
                   fontWeight: FontWeight.bold,
                 ),
               ),
 
-            if (!settings.voiceOn) const SizedBox(height: 12),
+            if (settings.voiceOn) const SizedBox(height: 12),
 
             // Rating
             Row(
               children: [
-                _buildStarRating(widget.item.rating),
+                _buildStarRating(item.rating),
                 const SizedBox(width: 8),
                 // Text(
                 //   '(${widget.item.rating}/5)',
@@ -813,7 +840,7 @@ class _BuyItemScreenState extends State<BuyItemScreen> {
               spacing: 5.0, // gap between adjacent chips
               runSpacing: 5.0, // gap between lines
               children:
-                  getNotes(widget.item.price).map((e) {
+                  getNotes(item.price).map((e) {
                     return SizedBox(width: 100, height: 50, child: e);
                   }).toList(),
             ),
@@ -838,11 +865,15 @@ class _BuyItemScreenState extends State<BuyItemScreen> {
                 child: Row(
                   mainAxisAlignment: MainAxisAlignment.center,
                   children: [
-                    Icon(Icons.shopping_cart, size: 30, color: Colors.white),
-
-                    if (!settings.voiceOn)
+                    const Icon(
+                      Icons.shopping_cart,
+                      size: 30,
+                      color: Colors.white,
+                    ),
+                    if (settings.voiceOn)
                       Text(
                         _getLocalizedText(
+                          context,
                           '    Buy Now',
                           '   اوس واخلئ',
                           '   ابھی خریدیں',

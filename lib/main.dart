@@ -6,26 +6,58 @@ import 'package:agahi/ecom/ecom.dart';
 import 'package:agahi/health/health.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_staggered_grid_view/flutter_staggered_grid_view.dart';
+import 'package:provider/provider.dart';
 import 'package:youtube_player_flutter/youtube_player_flutter.dart';
 
 enum Lang { ps, ur, en } //pashto, urdu, and english
 
-class SettingsForApp {
-  Lang language = Lang.en;
-  bool voiceOn = true;
+class SettingsForAppProvider with ChangeNotifier {
+  Lang _language = Lang.en;
+  bool _voiceOn = true;
+
+  Lang get language => _language;
+  bool get voiceOn => _voiceOn;
 
   void switchLanguage(Lang newLang) {
-    language = newLang;
+    _language = newLang;
+    notifyListeners();
   }
 
   void toggleVoice() {
-    voiceOn = !voiceOn;
+    _voiceOn = !_voiceOn;
+    notifyListeners();
+  }
+
+  String getLocalizedText(String english, String pashto, String urdu) {
+    switch (_language) {
+      case Lang.en:
+        return english;
+      case Lang.ps:
+        return pashto;
+      case Lang.ur:
+        return urdu;
+    }
+  }
+
+  String getToolName(EcomItem item) {
+    switch (_language) {
+      case Lang.en:
+        return item.engName;
+      case Lang.ps:
+        return item.psName;
+      case Lang.ur:
+        return item.urName;
+    }
   }
 }
 
-final SettingsForApp settings = SettingsForApp();
 void main() {
-  runApp(const MyApp());
+  runApp(
+    ChangeNotifierProvider(
+      create: (context) => SettingsForAppProvider(),
+      child: const MyApp(),
+    ),
+  );
 }
 
 class MyApp extends StatelessWidget {
@@ -86,38 +118,25 @@ class MyApp extends StatelessWidget {
         ),
       ),
       debugShowCheckedModeBanner: false,
-      home: SettingsScreen(),
+      home: const SettingsScreen(),
     );
   }
 }
 
-class SettingsScreen extends StatefulWidget {
+class SettingsScreen extends StatelessWidget {
   const SettingsScreen({super.key});
 
   @override
-  _SettingsScreenState createState() => _SettingsScreenState();
-}
-
-class _SettingsScreenState extends State<SettingsScreen> {
-  String _getLocalizedText(String english, String pashto, String urdu) {
-    switch (settings.language) {
-      case Lang.en:
-        return english;
-      case Lang.ps:
-        return pashto;
-      case Lang.ur:
-        return urdu;
-    }
-  }
-
-  @override
   Widget build(BuildContext context) {
+    final settings = context.watch<SettingsForAppProvider>();
+    final settingsNotifier = context.read<SettingsForAppProvider>();
+
     return Scaffold(
       appBar: AppBar(
         toolbarHeight: 120.0, // Increased height for better visibility
         title: Text(
-          _getLocalizedText('Settings', 'تنظیمات', 'سیٹنگز'),
-          style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold),
+          settings.getLocalizedText('Settings', 'تنظیمات', 'سیٹنگز'),
+          style: const TextStyle(fontSize: 24, fontWeight: FontWeight.bold),
         ),
         centerTitle: true,
       ),
@@ -131,9 +150,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
                 text: 'Pashto',
                 enabled: settings.language == Lang.ps,
                 onPressed: () {
-                  setState(() {
-                    settings.switchLanguage(Lang.ps);
-                  });
+                  settingsNotifier.switchLanguage(Lang.ps);
                 },
               ),
               const SizedBox(width: 20),
@@ -141,44 +158,39 @@ class _SettingsScreenState extends State<SettingsScreen> {
                 text: 'Urdu',
                 enabled: settings.language == Lang.ur,
                 onPressed: () {
-                  setState(() {
-                    settings.switchLanguage(Lang.ur);
-                  });
+                  settingsNotifier.switchLanguage(Lang.ur);
                 },
               ),
             ],
           ),
-
           const SizedBox(width: 20, height: 10),
           CustomSquareButton(
             text: 'English',
             enabled: settings.language == Lang.en,
             onPressed: () {
-              setState(() {
-                settings.switchLanguage(Lang.en);
-              });
+              settingsNotifier.switchLanguage(Lang.en);
             },
           ),
-
           const SizedBox(height: 50),
           CustomSquareButton(
             text:
                 settings.voiceOn
-                    ? _getLocalizedText('Voice On', 'غږ بل', 'آواز آن')
-                    : _getLocalizedText('Voice Off', 'غږ بند', 'آواز آف'),
+                    ? settings.getLocalizedText('Voice On', 'غږ بل', 'آواز آن')
+                    : settings.getLocalizedText(
+                      'Voice Off',
+                      'غږ بند',
+                      'آواز آف',
+                    ),
             enabled: settings.voiceOn,
             icon: Icon(
               settings.voiceOn ? Icons.volume_up : Icons.volume_off,
               size: 50, // Increased icon size for better visibility
             ),
             onPressed: () {
-              setState(() {
-                settings.toggleVoice();
-              });
+              settingsNotifier.toggleVoice();
             },
             size: 120.0, // Increased size for better visibility
           ),
-
           const SizedBox(height: 50),
           //animated next button:
           SexyCustomNextButton(
@@ -222,33 +234,19 @@ class _SettingsScreenState extends State<SettingsScreen> {
 }
 
 //Main screen:
-class MainScreen extends StatefulWidget {
+class MainScreen extends StatelessWidget {
   const MainScreen({super.key});
 
   @override
-  State<MainScreen> createState() => _MainScreenState();
-}
-
-class _MainScreenState extends State<MainScreen> {
-  String _getLocalizedText(String english, String pashto, String urdu) {
-    switch (settings.language) {
-      case Lang.en:
-        return english;
-      case Lang.ps:
-        return pashto;
-      case Lang.ur:
-        return urdu;
-    }
-  }
-
-  @override
   Widget build(BuildContext context) {
+    final settings = context.watch<SettingsForAppProvider>();
+    final settingsNotifier = context.read<SettingsForAppProvider>();
     return Scaffold(
       appBar: AppBar(
         toolbarHeight: 120.0,
         title: Text(
-          _getLocalizedText('Main Screen', 'اصلي پاڼه', 'مین سکرین'),
-          style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold),
+          settings.getLocalizedText('Main Screen', 'اصلي پاڼه', 'مین سکرین'),
+          style: const TextStyle(fontSize: 24, fontWeight: FontWeight.bold),
         ),
         centerTitle: true,
         leading: IconButton(
@@ -264,9 +262,7 @@ class _MainScreenState extends State<MainScreen> {
                     ? const Icon(Icons.volume_up)
                     : const Icon(Icons.volume_off),
             onPressed: () {
-              setState(() {
-                settings.toggleVoice();
-              });
+              settingsNotifier.toggleVoice();
             },
           ),
         ],
@@ -284,7 +280,11 @@ class _MainScreenState extends State<MainScreen> {
               child: CustomTallCategoryButton(
                 text:
                     settings.voiceOn
-                        ? _getLocalizedText('Education', 'زده کړه', 'تعلیم')
+                        ? settings.getLocalizedText(
+                          'Education',
+                          'زده کړه',
+                          'تعلیم',
+                        )
                         : '',
                 imagePath: 'assets/images/edu.png',
                 onPressed: () {
@@ -303,7 +303,11 @@ class _MainScreenState extends State<MainScreen> {
               child: CustomTallCategoryButton(
                 text:
                     settings.voiceOn
-                        ? _getLocalizedText('Agriculture', 'کرنه', 'زراعت')
+                        ? settings.getLocalizedText(
+                          'Agriculture',
+                          'کرنه',
+                          'زراعت',
+                        )
                         : '',
                 imagePath: 'assets/images/agri.png',
                 onPressed: () {
@@ -320,11 +324,11 @@ class _MainScreenState extends State<MainScreen> {
               child: CustomTallCategoryButton(
                 text:
                     settings.voiceOn
-                        ? _getLocalizedText('Health', 'روغتیا', 'صحت')
+                        ? settings.getLocalizedText('Health', 'روغتیا', 'صحت')
                         : '',
                 imagePath: 'assets/images/health.png',
                 onPressed: () {
-                  //navigate to health screen using a smooth left to right transition
+                  //navigate to health screen using a smooth right to left transition
                   Navigator.push(
                     context,
                     PageRouteBuilder(
@@ -363,13 +367,17 @@ class _MainScreenState extends State<MainScreen> {
               child: CustomTallCategoryButton(
                 text:
                     settings.voiceOn
-                        ? _getLocalizedText('E-commerce', 'بازار', 'تجارت')
+                        ? settings.getLocalizedText(
+                          'E-commerce',
+                          'بازار',
+                          'تجارت',
+                        )
                         : '',
                 imagePath: 'assets/images/ecom.png',
                 onPressed: () {
                   Navigator.push(
                     context,
-                    MaterialPageRoute(builder: (context) => EcomScreen()),
+                    MaterialPageRoute(builder: (context) => const EcomScreen()),
                   );
                 },
               ),
@@ -386,25 +394,16 @@ class _MainScreenState extends State<MainScreen> {
 class EducationScreen extends StatelessWidget {
   const EducationScreen({super.key});
 
-  String _getLocalizedText(String english, String pashto, String urdu) {
-    switch (settings.language) {
-      case Lang.en:
-        return english;
-      case Lang.ps:
-        return pashto;
-      case Lang.ur:
-        return urdu;
-    }
-  }
-
   @override
   Widget build(BuildContext context) {
+    final settings = context.watch<SettingsForAppProvider>();
+    final settingsNotifier = context.read<SettingsForAppProvider>();
     return Scaffold(
       appBar: AppBar(
         toolbarHeight: 120.0,
         title: Text(
-          _getLocalizedText('Education', 'زده کړه', 'تعلیم'),
-          style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold),
+          settings.getLocalizedText('Education', 'زده کړه', 'تعلیم'),
+          style: const TextStyle(fontSize: 24, fontWeight: FontWeight.bold),
         ),
         centerTitle: true,
         leading: IconButton(
@@ -420,7 +419,7 @@ class EducationScreen extends StatelessWidget {
                     ? const Icon(Icons.volume_up)
                     : const Icon(Icons.volume_off),
             onPressed: () {
-              // Implement voice toggle functionality
+              settingsNotifier.toggleVoice();
             },
           ),
         ],
@@ -428,18 +427,18 @@ class EducationScreen extends StatelessWidget {
       body: SingleChildScrollView(
         child: Column(
           children: [
-            YoutubeVideoPlayer(
+            const YoutubeVideoPlayer(
               youtubeUrl: 'https://www.youtube.com/watch?v=YMx8Bbev6T4',
             ),
             Padding(
-              padding: EdgeInsets.all(20.0),
+              padding: const EdgeInsets.all(20.0),
               child: Text(
-                _getLocalizedText(
+                settings.getLocalizedText(
                   'This is a simple education screen with a youtube video player. You can add more content here.',
                   'دا د یوټیوب ویډیو پلیر سره د زده کړې ساده پاڼه دی. تاسو کولی شئ دلته نور مطالب اضافه کړئ.',
                   'یہ یوٹیوب ویڈیو پلیئر کے ساتھ ایک سادہ تعلیمی سکرین ہے۔ آپ یہاں مزید مواد شامل کر سکتے ہیں۔',
                 ),
-                style: TextStyle(fontSize: 16),
+                style: const TextStyle(fontSize: 16),
               ),
             ),
           ],

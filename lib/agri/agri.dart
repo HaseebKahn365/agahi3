@@ -1,6 +1,7 @@
 import 'package:agahi/ecom/ecom.dart';
 import 'package:agahi/main.dart';
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
 
 //tools for
 List<EcomItem> agriItem = [
@@ -47,43 +48,18 @@ class YoutubeVideoPlayer extends StatefulWidget {
   State<YoutubeVideoPlayer> createState() => _YoutubeVideoPlayerState();
 } */
 
-class AgriScreen extends StatefulWidget {
+class AgriScreen extends StatelessWidget {
   const AgriScreen({super.key});
 
   @override
-  State<AgriScreen> createState() => _AgriScreenState();
-}
-
-class _AgriScreenState extends State<AgriScreen> {
-  String _getLocalizedText(String english, String pashto, String urdu) {
-    switch (settings.language) {
-      case Lang.en:
-        return english;
-      case Lang.ps:
-        return pashto;
-      case Lang.ur:
-        return urdu;
-    }
-  }
-
-  String _getToolName(EcomItem item) {
-    switch (settings.language) {
-      case Lang.en:
-        return item.engName;
-      case Lang.ps:
-        return item.psName;
-      case Lang.ur:
-        return item.urName;
-    }
-  }
-
-  @override
   Widget build(BuildContext context) {
+    final settings = context.watch<SettingsForAppProvider>();
+
     return Scaffold(
       appBar: AppBar(
         toolbarHeight: 120.0,
         title: Text(
-          _getLocalizedText('Agriculture', 'کرنه', 'زراعت'),
+          settings.getLocalizedText('Agriculture', 'کرنه', 'زراعت'),
           style: const TextStyle(fontSize: 24, fontWeight: FontWeight.bold),
         ),
         centerTitle: true,
@@ -100,9 +76,7 @@ class _AgriScreenState extends State<AgriScreen> {
                     ? const Icon(Icons.volume_up)
                     : const Icon(Icons.volume_off),
             onPressed: () {
-              setState(() {
-                settings.toggleVoice();
-              });
+              context.read<SettingsForAppProvider>().toggleVoice();
             },
           ),
         ],
@@ -124,7 +98,7 @@ class _AgriScreenState extends State<AgriScreen> {
                       const Icon(Icons.build, color: Colors.green, size: 24),
                       const SizedBox(width: 8),
                       Text(
-                        _getToolName(item),
+                        settings.getToolName(item),
                         style: const TextStyle(
                           fontSize: 20,
                           fontWeight: FontWeight.bold,
@@ -185,7 +159,11 @@ class _AgriScreenState extends State<AgriScreen> {
                       label:
                           settings.voiceOn
                               ? Text(
-                                _getLocalizedText('Buy', 'واخلئ', 'خریدیں'),
+                                settings.getLocalizedText(
+                                  'Buy',
+                                  'واخلئ',
+                                  'خریدیں',
+                                ),
                                 style: const TextStyle(
                                   color: Colors.white,
                                   fontSize: 16,

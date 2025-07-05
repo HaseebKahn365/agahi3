@@ -160,12 +160,34 @@ class HealthScreen extends StatelessWidget {
                         //navigate to the disease detail screen
                         Navigator.push(
                           context,
-                          MaterialPageRoute(
-                            builder:
-                                (context) => DiseaseDetailScreen(
-                                  disease: disease,
-                                  diseaseIndex: index,
-                                ),
+                          PageRouteBuilder(
+                            pageBuilder:
+                                (context, animation, secondaryAnimation) =>
+                                    DiseaseDetailScreen(
+                                      disease: disease,
+                                      diseaseIndex: index,
+                                    ),
+                            transitionsBuilder: (
+                              context,
+                              animation,
+                              secondaryAnimation,
+                              child,
+                            ) {
+                              const begin = Offset(1.0, 0.0);
+                              const end = Offset.zero;
+                              const curve = Curves.easeInOut;
+
+                              var tween = Tween(
+                                begin: begin,
+                                end: end,
+                              ).chain(CurveTween(curve: curve));
+                              var offsetAnimation = animation.drive(tween);
+
+                              return SlideTransition(
+                                position: offsetAnimation,
+                                child: child,
+                              );
+                            },
                           ),
                         );
                       },

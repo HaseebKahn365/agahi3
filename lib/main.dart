@@ -1,5 +1,6 @@
 // ignore_for_file: library_private_types_in_public_api
 
+import 'package:agahi/agri/agri.dart';
 import 'package:agahi/custom_wids.dart';
 import 'package:agahi/ecom/ecom.dart';
 import 'package:agahi/health/health.dart';
@@ -305,7 +306,12 @@ class _MainScreenState extends State<MainScreen> {
                         ? _getLocalizedText('Agriculture', 'کرنه', 'زراعت')
                         : '',
                 imagePath: 'assets/images/agri.png',
-                onPressed: () {},
+                onPressed: () {
+                  Navigator.push(
+                    context,
+                    MaterialPageRoute(builder: (context) => const AgriScreen()),
+                  );
+                },
               ),
             ),
             StaggeredGridTile.count(
@@ -447,11 +453,13 @@ class EducationScreen extends StatelessWidget {
 class YoutubeVideoPlayer extends StatefulWidget {
   final String youtubeUrl;
   final bool shouldPlay;
+  final double optionalHeight;
 
   const YoutubeVideoPlayer({
     super.key,
     required this.youtubeUrl,
     this.shouldPlay = false,
+    this.optionalHeight = 400.0,
   });
 
   @override
@@ -504,7 +512,7 @@ class _YoutubeVideoPlayerState extends State<YoutubeVideoPlayer> {
   @override
   Widget build(BuildContext context) {
     return SizedBox(
-      // height: 400,
+      height: widget.optionalHeight,
       width: MediaQuery.of(context).size.width - 30,
       // color: Colors.black,
       child: YoutubePlayerBuilder(
